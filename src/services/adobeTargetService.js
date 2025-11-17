@@ -148,15 +148,14 @@ async function getOffers(queryParam, mboxName) {
   }
 }
 
-async function getOfferDetails(offerId, query = {}) {
+async function getOfferDetails(offerId, offerType) {
   const accessToken = await fetchAccessToken();
 
   try {
     const { data } = await axios.get(
-      `${TARGET_API_BASE_URL}/${tenantId}/target/offers/${offerId}`,
+      `${TARGET_API_BASE_URL}/${tenantId}/target/offers/${offerType}/${offerId}`,
       {
         headers: buildAuthHeaders(accessToken),
-        params: query,
       },
     );
 
@@ -167,7 +166,7 @@ async function getOfferDetails(offerId, query = {}) {
   }
 }
 
-const APPROVED_IDENTIFIER = '[app] travatelashomeprod';
+const APPROVED_IDENTIFIER = 'travaTelasHomeProd';
 
 const matchesApprovedStatus = (offer) => offer?.status?.toLowerCase() === 'approved'
   || offer?.approvalStatus?.toLowerCase() === 'approved';
