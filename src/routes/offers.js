@@ -47,9 +47,20 @@ router.get('/approved', async (req, res) => {
 });
 
 router.get('/:offerId', async (req, res) => {
+  const { offerId } = req.params;
+
   try {
-    const offer = await adobeTargetService.getOfferDetails(req.params.offerId, req.query);
-    return res.json(offer);
+    const offerList = await adobeTargetService.getOffers({ id: offerId });
+
+    if (!offerList || !offerList.offers || offerList.offers.length === 0) {
+      return res.status(404).json({ message: `Offer with ID ${offerId} not found` });
+    }
+
+    const offerType = offerList.offers[0].type;
+    const offerDetails = await adobeTargetService.getOfferDetails(offerId, offerType);
+    offerDetails.type = offerType;
+
+    return res.json(offerDetails);
   } catch (error) {
     return res.status(500).json({
       message: 'Unable to fetch Adobe Target offer details',
