@@ -25,7 +25,8 @@ router.get('/', async (req, res) => {
       { ...query, approvalStatus, status },
       mboxName,
     );
-    return res.json(offers);
+    const filteredOffers = adobeTargetService.filterOffersByNameAndType(offers);
+    return res.json(filteredOffers);
   } catch (error) {
     return res.status(500).json({
       message: 'Unable to fetch Adobe Target offers',

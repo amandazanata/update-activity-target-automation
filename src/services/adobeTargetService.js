@@ -166,37 +166,50 @@ async function getOfferDetails(offerId, offerType) {
   }
 }
 
-const APPROVED_IDENTIFIER = 'travatelashomeprod';
+const OFFER_IDENTIFIER = 'travatelashomeprod';
 
 const matchesApprovedStatus = (offer) => offer?.status?.toLowerCase() === 'approved'
   || offer?.approvalStatus?.toLowerCase() === 'approved';
 
-const matchesApprovedIdentifier = (offer) => {
-  const normalizedIdentifier = APPROVED_IDENTIFIER.toLowerCase();
+const matchesOfferIdentifier = (offer) => {
+  const normalizedIdentifier = OFFER_IDENTIFIER.toLowerCase();
   const normalizedName = offer?.name?.toLowerCase() || '';
 
   return normalizedName.includes(normalizedIdentifier);
 };
 
-function filterApprovedOffers(offersPayload) {
-  if (!offersPayload) {
+const isJsonOffer = (offer) => normalizeString(offer?.type) === 'json';
+
+const matchesOfferCriteria = (offer) => matchesOfferIdentifier(offer) && isJsonOffer(offer);
+
+const matchesApprovedOffer = (offer) => matchesApprovedStatus(offer) && matchesOfferCriteria(offer);
+
+const filterOffersPayload = (offersPayload, filterFn) => {
+  if (!offersPayload || typeof filterFn !== 'function') {
     return offersPayload;
   }
 
   if (Array.isArray(offersPayload)) {
-    return offersPayload.filter((offer) => matchesApprovedStatus(offer)
-      && matchesApprovedIdentifier(offer));
+    return offersPayload.filter(filterFn);
   }
 
   if (Array.isArray(offersPayload.offers)) {
     return {
       ...offersPayload,
-      offers: offersPayload.offers.filter((offer) => matchesApprovedStatus(offer)
-        && matchesApprovedIdentifier(offer)),
+      offers: offersPayload.offers.filter(filterFn),
     };
   }
 
   return offersPayload;
+};
+
+const filterOffersByNameAndType = (offersPayload) => filterOffersPayload(
+  offersPayload,
+  matchesOfferCriteria,
+);
+
+function filterApprovedOffers(offersPayload) {
+  return filterOffersPayload(offersPayload, matchesApprovedOffer);
 }
 
 async function getApprovedOffers(queryParam, mboxName) {
@@ -213,4 +226,5 @@ module.exports = {
   getOffers,
   getOfferDetails,
   getApprovedOffers,
+  filterOffersByNameAndType,
 };
