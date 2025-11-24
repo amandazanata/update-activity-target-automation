@@ -26,4 +26,16 @@ router.get('/offers/json', async (req, res) => {
   }
 });
 
+router.get('/automation/trava-telas', async (req, res) => {
+  try {
+    const offers = await adobeTargetService.getTravaTelasOffers();
+    return res.json({ offers });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Unable to fetch approved Trava Telas offers',
+      details: error.message,
+    });
+  }
+});
+
 module.exports = router;
