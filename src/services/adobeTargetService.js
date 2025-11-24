@@ -10,6 +10,7 @@ const {
 
 const IMS_TOKEN_URL = 'https://ims-na1.adobelogin.com/ims/token/v3';
 const TARGET_API_BASE_URL = 'https://mc.adobe.io';
+const TRAVA_TELAS_IDENTIFIER = '[APP] travaTelasHomeProd';
 
 let cachedToken;
 
@@ -112,6 +113,22 @@ const findJsonOfferReference = (payload, activityId) => {
   return explicitMatch || potentialMatch;
 };
 
+async function getActivities(params = {}) {
+  const accessToken = await fetchAccessToken();
+
+  try {
+    const { data } = await axios.get(`${TARGET_API_BASE_URL}/${tenantId}/target/activities`, {
+      headers: buildAuthHeaders(accessToken),
+      params,
+    });
+
+    return data;
+  } catch (error) {
+    const details = error.response?.data || error.message;
+    throw new Error(`Failed to fetch Adobe Target activities: ${JSON.stringify(details)}`);
+  }
+}
+
 async function getActivityDetails(activityId, activityType) {
   if (!activityId) {
     throw new Error('An activity id is required to fetch its details');
@@ -184,10 +201,39 @@ async function getJsonOfferFromActivity(activityId, activityType) {
   };
 }
 
+async function getTravaTelasOffers() {
+  const { activities = [] } = await getActivities();
+
+  const matchingActivities = activities.filter((activity) => (
+    activity?.name?.includes(TRAVA_TELAS_IDENTIFIER)
+  ));
+
+  const approvedActivities = matchingActivities.filter((activity) => (
+    normalizeString(activity?.state) === 'approved'
+  ));
+
+  const offers = await Promise.all(
+    approvedActivities.map(async (activity) => {
+      const offerPayload = await getJsonOfferFromActivity(activity.id, activity.type);
+      return {
+        activityId: activity.id,
+        activityName: activity.name,
+        activityType: normalizeString(activity.type),
+        status: activity.state,
+        offer: offerPayload.offer,
+      };
+    }),
+  );
+
+  return offers;
+}
+
 module.exports = {
   fetchAccessToken,
+  getActivities,
   getActivityDetails,
   getOfferDetails,
   findJsonOfferReference,
   getJsonOfferFromActivity,
+  getTravaTelasOffers,
 };
