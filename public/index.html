@@ -92,6 +92,12 @@
       box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
     }
 
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
     /* Estilo para botão secundário (verde) */
     button.secondary {
       background: linear-gradient(90deg, #10b981, #059669);
@@ -148,6 +154,7 @@
       </p>
       <div class="inline">
         <button type="button" id="btn-trava-telas" class="secondary">Executar Automação</button>
+        <button type="button" id="btn-export-trava-telas">Exportar JSON</button>
         <div id="trava-telas-counter" class="counter">Ofertas: --</div>
       </div>
       <pre class="result" id="trava-telas-result">Aguardando execução...</pre>
@@ -174,6 +181,38 @@
       }
     };
 
+    const downloadJsonFile = async ({ url, filename, buttonId }) => {
+      const button = document.getElementById(buttonId);
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Exportando...';
+      }
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Falha ao gerar arquivo para download');
+        }
+
+        const blob = await response.blob();
+        const fileUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(fileUrl);
+      } catch (error) {
+        formatResult('trava-telas-result', `Erro ao exportar: ${error.message}`);
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.textContent = 'Exportar JSON';
+        }
+      }
+    };
+
     document.getElementById('btn-trava-telas').addEventListener('click', () => {
       handleFetch('/target/automation/trava-telas', {}, 'trava-telas-result', (payload) => {
         const counter = document.getElementById('trava-telas-counter');
@@ -181,6 +220,14 @@
           const total = payload?.totalOffers;
           counter.textContent = `Ofertas: ${typeof total === 'number' ? total : '--'}`;
         }
+      });
+    });
+
+    document.getElementById('btn-export-trava-telas').addEventListener('click', () => {
+      downloadJsonFile({
+        url: '/target/automation/trava-telas/export',
+        filename: 'trava-telas-ofertas.json',
+        buttonId: 'btn-export-trava-telas',
       });
     });
   </script>

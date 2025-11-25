@@ -18,4 +18,25 @@ router.get('/automation/trava-telas', async (req, res) => {
   }
 });
 
+router.get('/automation/trava-telas/export', async (req, res) => {
+  try {
+    const offers = await adobeTargetService.getTravaTelasOffers();
+    const payload = {
+      generatedAt: new Date().toISOString(),
+      totalOffers: offers.length,
+      offers,
+    };
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="trava-telas-ofertas.json"');
+
+    return res.send(JSON.stringify(payload, null, 2));
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Unable to export approved Trava Telas offers',
+      details: error.message,
+    });
+  }
+});
+
 module.exports = router;
