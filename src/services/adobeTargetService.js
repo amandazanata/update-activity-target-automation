@@ -410,7 +410,7 @@ async function updateTravaTelasOffersDate(targetActivityId = null) {
       return { updated: 0 };
     }
 
-    const activityOffers = offers.filter((offer) => offer.activityId == activityId);
+    const activityOffers = offers.filter((offer) => offer.activityId === activityId);
     let activityNeedsUpdate = false;
     let updatedInActivity = 0;
 
@@ -422,7 +422,7 @@ async function updateTravaTelasOffersDate(targetActivityId = null) {
       // Cenário A: Shared Offer (possui offerId, porém sem content incorporado)
       if (option.offerId && !hasEmbeddedContent) {
         console.log(`[updateTravaTelasOffersDate] Oferta compartilhada ${optionIdentifier} detectada.`);
-        const optionOffer = activityOffers.find((offer) => offer.offerId == option.offerId);
+        const optionOffer = activityOffers.find((offer) => offer.offerId === option.offerId);
         const offerType = optionOffer ? optionOffer.offerType : (option.type || 'json');
         let offerContent = optionOffer?.offer?.content || null;
 
