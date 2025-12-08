@@ -176,6 +176,8 @@
   </main>
 
   <script>
+    let cachedOffers = null;
+
     const formatResult = (elementId, data) => {
       const element = document.getElementById(elementId);
       element.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
@@ -243,13 +245,25 @@
 
     document.getElementById('btn-load-trava-telas').addEventListener('click', () => {
       handleFetch('/target/automation/trava-telas', {}, 'trava-telas-result', (payload) => {
+        cachedOffers = Array.isArray(payload?.offers) ? payload.offers : null;
         updateCounter(payload);
       });
     });
 
     document.getElementById('btn-update-trava-telas').addEventListener('click', () => {
+      if (!Array.isArray(cachedOffers) || cachedOffers.length === 0) {
+        formatResult('trava-telas-result', 'Nenhuma oferta carregada. Use "Carregar Atividades" antes de atualizar.');
+        return;
+      }
+
       const url = `/target/automation/trava-telas/update-date${getActivityIdQuery()}`;
-      handleFetch(url, { method: 'PUT' }, 'trava-telas-result');
+      const options = {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ offers: cachedOffers }),
+      };
+
+      handleFetch(url, options, 'trava-telas-result');
     });
 
     document.getElementById('btn-export-trava-telas').addEventListener('click', () => {
