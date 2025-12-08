@@ -294,14 +294,24 @@ async function getTravaTelasOffers(targetActivityId = null) {
   return results.flat();
 }
 
-async function updateTravaTelasOffersDate(targetActivityId = null) {
+async function updateTravaTelasOffersDate(targetActivityId = null, providedOffers = null) {
   const today = new Date();
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, '0');
   const dd = String(today.getDate()).padStart(2, '0');
   const formattedDate = `${yyyy}${mm}${dd}`;
 
-  const offers = await getTravaTelasOffers(targetActivityId);
+  const offersSource = Array.isArray(providedOffers)
+    ? providedOffers
+    : await getTravaTelasOffers(targetActivityId);
+
+  const offers = offersSource.filter((offer) => {
+    const hasRequiredFields = offer && offer.offerId && offer.offerType;
+    if (!hasRequiredFields) {
+      console.warn(`Skipping offer without required identifiers: ${JSON.stringify(offer)}`);
+    }
+    return hasRequiredFields;
+  });
 
   const updatePromises = offers.map(async (offerData) => {
     const { offerId, offerType, offer } = offerData;
