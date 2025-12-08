@@ -42,7 +42,18 @@ router.get('/automation/trava-telas/export', async (req, res) => {
 router.put('/automation/trava-telas/update-date', async (req, res) => {
   try {
     const { activityId } = req.query;
-    const result = await adobeTargetService.updateTravaTelasOffersDate(activityId || null);
+    const { offers } = req.body || {};
+
+    if (offers && !Array.isArray(offers)) {
+      return res.status(400).json({
+        message: 'Invalid payload: offers must be an array of offer objects',
+      });
+    }
+
+    const result = await adobeTargetService.updateTravaTelasOffersDate(
+      activityId || null,
+      Array.isArray(offers) ? offers : null,
+    );
     return res.json({
       message: activityId
         ? `Test run for Activity ID: ${activityId}`
