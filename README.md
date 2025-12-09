@@ -29,6 +29,10 @@ Serviço Node.js para recuperar atividades do Adobe Target via API oficial. O pr
 
 O serviço ficará disponível em `http://localhost:<API_PORT>` (padrão `3001`).
 
+### Variáveis de ambiente relevantes
+
+- `TRAVA_TELAS_IDENTIFIER` — Texto utilizado para identificar a atividade de "Trava Telas". Se não informado, o valor padrão é `[APP] travaTelasHomeProd`.
+
 ## Endpoints
 
 - `GET /health` — Verificação de saúde simples.

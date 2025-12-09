@@ -5,7 +5,8 @@ const router = express.Router();
 
 router.get('/automation/trava-telas', async (req, res) => {
   try {
-    const offers = await adobeTargetService.getTravaTelasOffers();
+    const { activityId } = req.query;
+    const offers = await adobeTargetService.getTravaTelasOffers(activityId || null);
     return res.json({
       totalOffers: offers.length,
       offers,
@@ -20,7 +21,8 @@ router.get('/automation/trava-telas', async (req, res) => {
 
 router.get('/automation/trava-telas/export', async (req, res) => {
   try {
-    const offers = await adobeTargetService.getTravaTelasOffers();
+    const { activityId } = req.query;
+    const offers = await adobeTargetService.getTravaTelasOffers(activityId || null);
     const payload = {
       generatedAt: new Date().toISOString(),
       totalOffers: offers.length,
