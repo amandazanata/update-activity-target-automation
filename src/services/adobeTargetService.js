@@ -199,13 +199,13 @@ async function getOfferDetails(offerId, offerType) {
   }
 }
 
-async function updateOfferContent(offerId, _offerType, content) {
+async function updateOfferContent(offerId, _offerType, content, name) {
   const accessToken = await fetchAccessToken();
 
   try {
     const { data } = await axios.put(
       `${TARGET_API_BASE_URL}/${tenantId}/target/offers/json/${offerId}`,
-      { content },
+      { name, content },
       { headers: buildAuthHeaders(accessToken) },
     );
 
@@ -321,6 +321,7 @@ async function updateTravaTelasOffersDate(targetActivityId = null, providedOffer
   const updatePromises = offers.map(async (offerData) => {
     const { offerId, offerType, offer } = offerData;
     let { content } = offer;
+    const { name } = offer;
 
     if (!content) return false;
 
@@ -344,7 +345,7 @@ async function updateTravaTelasOffersDate(targetActivityId = null, providedOffer
 
     const updatedContent = { ...content, payload: { ...payload, nomeOferta: updatedName } };
 
-    await updateOfferContent(offerId, offerType, updatedContent);
+    await updateOfferContent(offerId, offerType, updatedContent, name);
     return true;
   });
 
