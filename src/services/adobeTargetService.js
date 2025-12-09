@@ -6,11 +6,12 @@ const {
   clientSecret,
   apiKey,
   apiScope,
+  travaTelasIdentifier,
 } = require('../config/environment');
 
 const IMS_TOKEN_URL = 'https://ims-na1.adobelogin.com/ims/token/v3';
 const TARGET_API_BASE_URL = 'https://mc.adobe.io';
-const TRAVA_TELAS_IDENTIFIER = '[APP] travaTelasHomeProd';
+const TRAVA_TELAS_IDENTIFIER = travaTelasIdentifier;
 
 let cachedToken;
 
@@ -241,6 +242,8 @@ async function buildOffersContent(activity, listOffers) {
 }
 
 async function getTravaTelasOffers(targetActivityId = null) {
+  const normalizedIdentifier = normalizeString(TRAVA_TELAS_IDENTIFIER);
+
   // 1. Buscar listas base em paralelo
   const [activitiesData, offersData] = await Promise.all([
     getActivities(),
@@ -256,10 +259,11 @@ async function getTravaTelasOffers(targetActivityId = null) {
       return activity?.id?.toString() === targetActivityId.toString();
     }
 
-    return (
-      activity?.name?.includes(TRAVA_TELAS_IDENTIFIER)
-      && normalizeString(activity?.state) === 'approved'
-    );
+    const matchesIdentifier = normalizedIdentifier
+      ? normalizeString(activity?.name).includes(normalizedIdentifier)
+      : true;
+
+    return matchesIdentifier && normalizeString(activity?.state) === 'approved';
   });
 
   // 3. Processar cada atividade

@@ -22,4 +22,5 @@ module.exports = {
   apiKey: process.env.API_KEY,
   apiScope: process.env.API_SCOPE,
   port: process.env.API_PORT ? Number(process.env.API_PORT) : 3001,
+  travaTelasIdentifier: process.env.TRAVA_TELAS_IDENTIFIER || '[APP] travaTelasHomeProd',
 };
