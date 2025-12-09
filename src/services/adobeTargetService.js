@@ -18,6 +18,7 @@ let cachedToken;
 const buildAuthHeaders = (accessToken) => ({
   Authorization: `Bearer ${accessToken}`,
   'x-api-key': apiKey,
+  'Content-Type': 'application/vnd.adobe.target.v2+json',
   Accept: 'application/vnd.adobe.target.v2+json',
 });
 
